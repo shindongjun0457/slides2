@@ -44,7 +44,7 @@
     </header>
 
     <main class="viewer">
-      <img id="slide" alt="사진" />
+      <img id="slide" alt="사진" referrerpolicy="no-referrer" />
       <div class="counter" id="counter">0 / 0</div>
     </main>
 
@@ -71,7 +71,7 @@
     /* ================================
        🔧 환경설정 (slides2 전용)
     =================================*/
-    const GOOGLE_API_KEY   = "AIzaSyB5fxju30j5haSlHux8TrhqzG5ui_-Ljho";     
+    const GOOGLE_API_KEY   = "AIzaSyB5fxju30j5haSlHux8TrhqzG5ui_-Ljho";
     const PUBLIC_FOLDER_ID = "1pfTBWOTpvoPazLsqz2scVdKQdKJP4Ngz";
 
     /* ================================
@@ -166,31 +166,42 @@
     }
 
     /* ================================
-       뷰어 로직
+       뷰어 로직 (CORS 프리)
+       - 이미지 로딩을 Drive의 공개 URL 포맷으로 전환
+       - 실패 시 썸네일 URL로 폴백
     =================================*/
-    async function show(i){
+    function show(i){
       if (files.length===0){
         slideEl.removeAttribute('src'); counterEl.textContent='0 / 0'; return;
       }
       index = (i + files.length) % files.length;
       const file = files[index];
-      const url  = `${API_BASE}/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
+
+      // 공개 이미지용 URL (CORS OK)
+      const viewUrl = `https://drive.google.com/uc?export=view&id=${file.id}`;
+      // 혹시 view가 막히면 썸네일(고해상도 시도)로 폴백
+      const thumbUrl = `https://drive.google.com/thumbnail?id=${file.id}&sz=w2000`;
 
       slideEl.classList.remove('visible');
-      try{
-        const res  = await fetch(url);
-        if(!res.ok) throw new Error('이미지 로드 실패');
-        const blob = await res.blob();
-        const objUrl = URL.createObjectURL(blob);
-        slideEl.src  = objUrl;
-        slideEl.onload = ()=>{
-          slideEl.classList.add('visible');
-          setTimeout(()=>URL.revokeObjectURL(objUrl), 1000);
-        };
-      }catch(err){
-        console.error(err);
-        toast('이미지 로드 실패');
-      }
+
+      // 먼저 viewUrl 시도
+      slideEl.onerror = () => {
+        // view 실패 시 한 번만 썸네일로 교체
+        if (slideEl.dataset.fallback !== "1") {
+          slideEl.dataset.fallback = "1";
+          slideEl.src = thumbUrl;
+        } else {
+          // 썸네일까지 실패하면 에러 표시
+          toast('이미지 로드 실패');
+        }
+      };
+
+      slideEl.onload = () => {
+        slideEl.classList.add('visible');
+        slideEl.dataset.fallback = "0";
+      };
+
+      slideEl.src = viewUrl;
       counterEl.textContent = `${index+1} / ${files.length}`;
     }
 
