@@ -3,98 +3,44 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Google Drive 슬라이드쇼</title>
+  <title>Drive 슬라이드쇼 (공개 전용 / slides2)</title>
   <style>
-    :root{
-      --bg: #000;
-      --fg: #fff;
-      --muted:#bbb;
-      --accent:#7cc;
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    html,body{height:100%;width:100%;}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif;
-      overflow:hidden; /* ✅ 스크롤 완전히 숨기기 */
-    }
-    .app{
-      height:100%;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      transition:all .4s ease;
-    }
-    .app.compact{
-      grid-template-rows:0 1fr 0; /* ✅ 헤더/푸터 완전 접기 */
-    }
-
-    header, footer{
-      display:flex; align-items:center; gap:.75rem;
-      padding:.6rem .9rem; transition:all .4s ease;
-      overflow:hidden;
-    }
-    header{justify-content:space-between; background:rgba(255,255,255,.06);}
-    footer{justify-content:center; background:rgba(255,255,255,.04);}
-
-    header.hidden-ui, footer.hidden-ui{
-      opacity:0;
-      pointer-events:none;
-      height:0;
-      padding:0;
-      margin:0;
-      border:0;
-    }
-
-    .btn{
-      appearance:none;
-      border:1px solid rgba(255,255,255,.25);
-      background:transparent;
-      color:var(--fg);
-      padding:.5rem .8rem;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:600;
-    }
+    :root{ --bg:#000; --fg:#fff; --muted:#bbb; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;width:100%}
+    body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;overflow:hidden}
+    .app{height:100%;display:grid;grid-template-rows:auto 1fr auto;transition:all .3s ease}
+    .app.compact{grid-template-rows:0 1fr 0}
+    header,footer{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;transition:all .3s ease;overflow:hidden}
+    header{justify-content:space-between;background:rgba(255,255,255,.06)}
+    footer{justify-content:center;background:rgba(255,255,255,.04)}
+    header.hidden-ui,footer.hidden-ui{opacity:0;pointer-events:none;height:0;padding:0;margin:0;border:0}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.25);background:transparent;color:var(--fg);padding:.5rem .8rem;border-radius:999px;cursor:pointer;font-weight:600}
     .btn:hover{border-color:var(--fg)}
-    .btn[disabled]{opacity:.5; cursor:not-allowed}
-    .icon-btn{display:inline-flex; align-items:center; gap:.4rem}
-    .status{font-size:.9rem; color:var(--muted)}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .status{font-size:.9rem;color:var(--muted)}
     .spacer{flex:1}
-
-    .viewer{
-      position:relative;
-      height:100%; width:100%;
-      background:var(--bg); overflow:hidden;
-    }
+    .viewer{position:relative;height:100%;width:100%;overflow:hidden;background:var(--bg)}
     .viewer img{
-      position:absolute;
-      top:0; left:0;
-      width:100%; height:100%;
-      object-fit:contain;
-      background:var(--bg);
-      opacity:0; transition:opacity 1s ease;
+      position:absolute;top:50%;left:50%;
+      max-width:100%;max-height:100%;
+      transform:translate(-50%,-50%);
+      object-fit:contain;background:var(--bg);
+      opacity:0;transition:opacity 1s ease;
     }
-    .viewer img.visible{opacity:1;}
-
-    .counter{
-      position:absolute; bottom:10px; right:20px;
-      background:rgba(0,0,0,0.5);
-      padding:4px 8px; border-radius:6px; font-size:.9rem;
-    }
+    .viewer img.visible{opacity:1}
+    .counter{position:absolute;bottom:10px;right:20px;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:6px;font-size:.9rem}
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <div style="display:flex; align-items:center; gap:.6rem">
-        <strong>Drive 슬라이드쇼</strong>
-        <span class="status" id="status">로그인 필요</span>
+    <header id="header">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <strong>공개 슬라이드쇼</strong>
+        <span class="status" id="status">공개 폴더에서 로드 준비…</span>
       </div>
       <div class="spacer"></div>
-      <button class="btn" id="loginBtn">Google 로그인</button>
-      <button class="btn hidden" id="logoutBtn">로그아웃</button>
+      <!-- 로그인 UI 없음 -->
     </header>
 
     <main class="viewer">
@@ -102,11 +48,11 @@
       <div class="counter" id="counter">0 / 0</div>
     </main>
 
-    <footer>
-      <button class="btn icon-btn" id="prevBtn">◀ 이전</button>
-      <button class="btn icon-btn" id="playPauseBtn">⏸ 일시정지</button>
-      <button class="btn icon-btn" id="nextBtn">다음 ▶</button>
-      <button class="btn icon-btn" id="reloadBtn">🔄 새로고침</button>
+    <footer id="footer">
+      <button class="btn" id="prevBtn">◀ 이전</button>
+      <button class="btn" id="playPauseBtn">⏸ 일시정지</button>
+      <button class="btn" id="nextBtn">다음 ▶</button>
+      <button class="btn" id="reloadBtn">🔄 새로고침</button>
       <span class="spacer"></span>
       <label class="status">전환 간격
         <select id="intervalSelect">
@@ -121,149 +67,140 @@
     </footer>
   </div>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
-    const GOOGLE_CLIENT_ID = "195530113287-9v9le5k38vjbumgl839pkopn04hv747o.apps.googleusercontent.com";
-    const DRIVE_FOLDER_ID  = "1pvgxYx7jSiuCYZAX_UXXiBxTMffRV_at";
-    const ALLOWED_EMAILS   = [
-      "djshin0457@gmail.com",
-      "djcom@ohyun.ms.kr",
-      "m23djcom@onedu.jje.go.kr"
-    ];
+    /* ================================
+       🔧 환경설정 (slides2 전용)
+    =================================*/
+    const GOOGLE_API_KEY   = "AIzaSyB5fxju30j5haSlHux8TrhqzG5ui_-Ljho";     
+    const PUBLIC_FOLDER_ID = "1pfTBWOTpvoPazLsqz2scVdKQdKJP4Ngz";
 
-    const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
+    /* ================================
+       상수 / 상태
+    =================================*/
     const API_BASE = "https://www.googleapis.com/drive/v3";
+    let files = [], index = 0, timer = null, intervalMs = 10000, playing = true;
 
-    let tokenClient=null, accessToken=null, userEmail=null;
-    let files=[], index=0, timer=null, intervalMs=10000, playing=true;
+    const statusEl   = document.getElementById('status');
+    const slideEl    = document.getElementById('slide');
+    const counterEl  = document.getElementById('counter');
+    const prevBtn    = document.getElementById('prevBtn');
+    const nextBtn    = document.getElementById('nextBtn');
+    const reloadBtn  = document.getElementById('reloadBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const intervalSelect = document.getElementById('intervalSelect');
+    const headerEl   = document.getElementById('header');
+    const footerEl   = document.getElementById('footer');
+    const appEl      = document.querySelector('.app');
 
-    const statusEl=document.getElementById('status');
-    const slideEl=document.getElementById('slide');
-    const loginBtn=document.getElementById('loginBtn');
-    const logoutBtn=document.getElementById('logoutBtn');
-    const prevBtn=document.getElementById('prevBtn');
-    const nextBtn=document.getElementById('nextBtn');
-    const reloadBtn=document.getElementById('reloadBtn');
-    const playPauseBtn=document.getElementById('playPauseBtn');
-    const intervalSelect=document.getElementById('intervalSelect');
-    const counterEl=document.getElementById('counter');
-    const appEl=document.querySelector('.app');
+    function toast(msg){ statusEl.textContent = msg; }
 
-    function toast(msg){statusEl.textContent=msg;}
-
-    window.onload=()=>{
-      tokenClient=google.accounts.oauth2.initTokenClient({
-        client_id:GOOGLE_CLIENT_ID,
-        scope:DRIVE_SCOPE+' email profile openid',
-        callback:(resp)=>{
-          if(resp && resp.access_token){
-            accessToken=resp.access_token;
-            fetch(`https://www.googleapis.com/oauth2/v3/userinfo`,{headers:{Authorization:`Bearer ${accessToken}`}})
-            .then(r=>r.json()).then(info=>{
-              userEmail=info.email;
-              if(ALLOWED_EMAILS.length>0 && !ALLOWED_EMAILS.includes(userEmail)){
-                toast(`허용되지 않은 계정: ${userEmail}`);
-                logoutUI(); return;
-              }
-              loginUI(info);
-              loadAllImages().then(()=>startSlideshow());
-            }).catch(()=>toast('사용자 정보 조회 실패'));
-          }else toast('로그인 실패');
-        }
+    window.onload = async () => {
+      bindUI();
+      try{
+        await loadAllImagesPublic();
+        startSlideshow();
+      }catch(e){
+        console.error(e);
+        toast('공개 폴더 로드 실패');
+      }
+      document.addEventListener('fullscreenchange', () => {
+        document.body.style.overflow = "hidden";
+        forceRelayout();
       });
+      window.addEventListener('resize', forceRelayout);
+    };
 
-      loginBtn.onclick=requestAccessToken;
-      logoutBtn.onclick=doLogout;
-      prevBtn.onclick=()=>{prev(); restartTimer();};
-      nextBtn.onclick=()=>{next(); restartTimer();};
-      reloadBtn.onclick=async()=>{
-        const keep=index; await loadAllImages();
-        index=Math.min(keep,Math.max(0,files.length-1));
-        show(index); if(playing)restartTimer();
-        toast('Drive에서 최신 목록을 불러왔습니다');
+    function bindUI(){
+      prevBtn.onclick = () => { prev(); restartTimer(); };
+      nextBtn.onclick = () => { next(); restartTimer(); };
+      reloadBtn.onclick = async () => {
+        const keep = index;
+        await loadAllImagesPublic();
+        index = Math.min(keep, Math.max(0, files.length-1));
+        show(index);
+        if (playing) restartTimer();
+        toast('최신 목록을 불러왔습니다');
       };
-      playPauseBtn.onclick=togglePlay;
-      intervalSelect.onchange=()=>{
-        intervalMs=parseInt(intervalSelect.value,10);
-        if(playing)restartTimer();
+      playPauseBtn.onclick = togglePlay;
+      intervalSelect.onchange = () => {
+        intervalMs = parseInt(intervalSelect.value,10);
+        if (playing) restartTimer();
       };
 
+      // 단축키
       let uiHidden=false;
       window.addEventListener('keydown',(e)=>{
         if(e.key==='ArrowLeft'){prev();restartTimer();}
         if(e.key==='ArrowRight'){next();restartTimer();}
         if(e.key===' '){e.preventDefault();togglePlay();}
-        if(e.key.toLowerCase()==='r')reloadBtn.click();
+        if(e.key.toLowerCase()==='r') reloadBtn.click();
         if(e.key.toLowerCase()==='h'){
           uiHidden=!uiHidden;
-          document.querySelector('header').classList.toggle('hidden-ui',uiHidden);
-          document.querySelector('footer').classList.toggle('hidden-ui',uiHidden);
-          appEl.classList.toggle('compact',uiHidden);  // ✅ 전체 높이 변화 반영
+          headerEl.classList.toggle('hidden-ui', uiHidden);
+          footerEl.classList.toggle('hidden-ui', uiHidden);
+          appEl.classList.toggle('compact', uiHidden);
+          forceRelayout();
         }
         if(e.key.toLowerCase()==='f') toggleFullScreen();
       });
-
-      // ✅ 전체화면 진입/종료 시 스크롤 차단
-      document.addEventListener("fullscreenchange", () => {
-        document.body.style.overflow = "hidden";
-      });
     }
 
-    function requestAccessToken(){tokenClient.requestAccessToken({prompt:'consent'});}
-    function loginUI(info){
-      loginBtn.classList.add('hidden');
-      logoutBtn.classList.remove('hidden');
-      statusEl.textContent=`${info.email} 로그인됨`;
-    }
-    function logoutUI(){
-      loginBtn.classList.remove('hidden');
-      logoutBtn.classList.add('hidden');
-      statusEl.textContent='로그인 필요';
-      stopSlideshow(); files=[]; index=0; slideEl.removeAttribute('src');
-    }
-    function doLogout(){accessToken=null; userEmail=null; logoutUI(); toast('로그아웃 되었습니다');}
-
-    async function loadAllImages(){
-      if(!accessToken) throw new Error('accessToken 없음');
-      files=[]; let pageToken;
-      const q=encodeURIComponent(`'${DRIVE_FOLDER_ID}' in parents and mimeType contains 'image/' and trashed = false`);
-      const fields=encodeURIComponent('nextPageToken, files(id,name,mimeType,modifiedTime)');
+    /* ================================
+       데이터 로드 (공개 전용)
+    =================================*/
+    async function loadAllImagesPublic(){
+      files = []; let pageToken;
+      const q = encodeURIComponent(`'${PUBLIC_FOLDER_ID}' in parents and mimeType contains 'image/' and trashed=false`);
+      const fields = encodeURIComponent('nextPageToken, files(id,name,mimeType,modifiedTime)');
       do{
-        const url=`${API_BASE}/files?q=${q}&fields=${fields}&orderBy=modifiedTime&pageSize=1000${pageToken?`&pageToken=${pageToken}`:''}`;
-        const res=await fetch(url,{headers:{Authorization:`Bearer ${accessToken}`}});
-        const data=await res.json();
-        if(Array.isArray(data.files)) files.push(...data.files);
-        pageToken=data.nextPageToken;
+        const url = `${API_BASE}/files?q=${q}&fields=${fields}&orderBy=modifiedTime&pageSize=1000&key=${GOOGLE_API_KEY}${pageToken?`&pageToken=${pageToken}`:''}&supportsAllDrives=true&includeItemsFromAllDrives=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) throw new Error(JSON.stringify(data));
+        if (Array.isArray(data.files)) files.push(...data.files);
+        pageToken = data.nextPageToken;
       }while(pageToken);
-      toast(`${files.length}장 로드 완료`);
-      index=Math.min(index,Math.max(0,files.length-1));
+      toast(`(공개) ${files.length}장 로드 완료`);
+      index = Math.min(index, Math.max(0, files.length-1));
       show(index);
     }
 
+    /* ================================
+       뷰어 로직
+    =================================*/
     async function show(i){
-      if(files.length===0){slideEl.removeAttribute('src');counterEl.textContent='0 / 0';return;}
-      index=(i+files.length)%files.length;
-      const file=files[index];
-      const url=`${API_BASE}/files/${file.id}?alt=media`;
-      const res=await fetch(url,{headers:{Authorization:`Bearer ${accessToken}`}});
-      const blob=await res.blob();
-      const objUrl=URL.createObjectURL(blob);
+      if (files.length===0){
+        slideEl.removeAttribute('src'); counterEl.textContent='0 / 0'; return;
+      }
+      index = (i + files.length) % files.length;
+      const file = files[index];
+      const url  = `${API_BASE}/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
+
       slideEl.classList.remove('visible');
-      slideEl.src=objUrl;
-      slideEl.onload=()=>{
-        slideEl.classList.add('visible');
-        setTimeout(()=>URL.revokeObjectURL(objUrl),1000);
-      };
-      counterEl.textContent=`${index+1} / ${files.length}`;
+      try{
+        const res  = await fetch(url);
+        if(!res.ok) throw new Error('이미지 로드 실패');
+        const blob = await res.blob();
+        const objUrl = URL.createObjectURL(blob);
+        slideEl.src  = objUrl;
+        slideEl.onload = ()=>{
+          slideEl.classList.add('visible');
+          setTimeout(()=>URL.revokeObjectURL(objUrl), 1000);
+        };
+      }catch(err){
+        console.error(err);
+        toast('이미지 로드 실패');
+      }
+      counterEl.textContent = `${index+1} / ${files.length}`;
     }
 
-    function next(){if(files.length){show(index+1);}}
-    function prev(){if(files.length){show(index-1);}}
+    function next(){ if(files.length){ show(index+1); } }
+    function prev(){ if(files.length){ show(index-1); } }
 
-    function startSlideshow(){playing=true;playPauseBtn.textContent='⏸ 일시정지';restartTimer();}
-    function stopSlideshow(){playing=false;playPauseBtn.textContent='▶ 재생';if(timer){clearInterval(timer);timer=null;}}
-    function restartTimer(){if(timer)clearInterval(timer);timer=setInterval(()=>{next();},intervalMs);}
-    function togglePlay(){if(playing)stopSlideshow();else startSlideshow();}
+    function startSlideshow(){ playing=true; playPauseBtn.textContent='⏸ 일시정지'; restartTimer(); }
+    function stopSlideshow(){ playing=false; playPauseBtn.textContent='▶ 재생'; if(timer){clearInterval(timer); timer=null;} }
+    function restartTimer(){ if(timer) clearInterval(timer); timer=setInterval(()=>{ next(); }, intervalMs); }
+    function togglePlay(){ if(playing) stopSlideshow(); else startSlideshow(); }
 
     function toggleFullScreen(){
       if(!document.fullscreenElement){
@@ -273,6 +210,14 @@
         document.exitFullscreen();
         document.body.style.overflow = "hidden";
       }
+      forceRelayout();
+    }
+
+    function forceRelayout(){
+      slideEl.style.willChange = 'transform';
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+        slideEl.style.willChange = 'auto';
+      });});
     }
   </script>
 </body>
